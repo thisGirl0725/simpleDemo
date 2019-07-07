@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.by.mapper.UserMapper">
+    <select id="selectByUserName" resultType="com.by.model.User">
+        select * from t_user where user_name = #{userName}
+    </select>
+    <select id="selectByUser" resultType="com.by.model.User">
+        select * from t_user where user_name=#{userName} and user_pswd=#{userPswd}
+    </select>
+    <insert id="addUser" parameterType="com.by.model.User">
+        insert  into  t_user(user_name,user_pswd) values (#{userName},#{userPswd})
+    </insert>
+    <delete id="delectById" >
+        delete from t_user where user_id in
+        <foreach collection="arr" item="userId" separator="," open="(" close=")">
+            #{userId}
+        </foreach>
+    </delete>
+
+
+    <insert id="addUserRole" parameterType="com.by.model.RoleIdVo">
+        insert into t_role_and_user (user_id,role_id) values
+        <foreach collection="roleId.roleName" item="roleId" separator=",">
+        <if test="roleId!=null">
+            (#{id},#{roleId})
+        </if>
+        </foreach>
+    </insert>
+    <select id="selectAll" resultMap="MyRoleAndUser">
+        SELECT u.`user_id` AS user_id,u.`user_name` AS user_name,r.`role_name` AS role_name
+            FROM (select * from t_user) u LEFT JOIN t_role_and_user ru ON u.`user_id`=ru.`user_id` LEFT JOIN t_role r ON ru.`role_id`=r.`role_id`
+    </select>
+    <resultMap id="MyRoleAndUser" type="com.by.model.RoleAndUserVo" autoMapping="true">
+        <id column="user_id" property="userId"></id>
+        <collection property="roles" ofType="com.by.model.Role" autoMapping="true">
+        </collection>
+    </resultMap>
+
+    <select id="selectAll2" resultMap="MyRoleAndUser">
+         SELECT u.`user_id` AS user_id,u.`user_name` AS user_name,r.`role_name` AS role_name
+            FROM (select * from t_user  ) u LEFT JOIN t_role_and_user ru ON u.`user_id`=ru.`user_id` LEFT JOIN t_role r ON ru.`role_id`=r.`role_id`
+    </select>
+    <select id="selectByCount" resultType="int">
+          select count(DISTINCT(user_id)) from t_user
+    </select>
+    <select id="findRoleByUserName" resultType="string">
+
+
+        SELECT  role_name FROM t_user  u LEFT JOIN t_role_and_user ru ON u.user_id=ru.user_id
+        LEFT JOIN t_role r ON ru.`role_id`=r.`role_id`
+        WHERE user_name=#{username}
+
+    </select>
+
+</mapper>
+
